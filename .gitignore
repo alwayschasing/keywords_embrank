@@ -1,3 +1,6 @@
 /.ideal/
 *.pyc
 */__pycache__/*
+config_data/*
+input_data/*
+output_data/*

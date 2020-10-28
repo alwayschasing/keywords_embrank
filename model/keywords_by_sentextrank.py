@@ -10,7 +10,7 @@ import logging
 from . import util
 from .segmentation import Segmentation
 loglevel=logging.INFO
-if os.environment["DEBUG"] == 1:
+if os.environ["DEBUG"] == 1:
     loglevel=logging.DEBUG
 logging.basicConfig(level=loglevel, format="[%(levelname).1s %(asctime)s] %(message)s", datefmt="%Y-%m-%d_%H:%M:%S")
 logger = logging.getLogger(__name__)
