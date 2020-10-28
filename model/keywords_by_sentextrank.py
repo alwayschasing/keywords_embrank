@@ -21,6 +21,7 @@ class KeywordsBySenTextrank(object):
                  vocab_file,
                  vocab_emb_file,
                  keywords_file=None,
+                 user_dict=None,
                  stop_words_file=None,
                  allow_speech_tags=util.allow_speech_tags,
                  delimiters=util.sentence_delimiters):
@@ -33,7 +34,8 @@ class KeywordsBySenTextrank(object):
         self.words_no_stop_words     --  去掉words_no_filter中的停止词而得到的两级列表。
         self.words_all_filters       --  保留words_no_stop_words中指定词性的单词而得到的两级列表。
         """
-        self.seg = Segmentation(stop_words_file=stop_words_file,
+        self.seg = Segmentation(user_dict=user_dict,
+                                stop_words_file=stop_words_file,
                                 allow_speech_tags=allow_speech_tags,
                                 delimiters=delimiters)
 

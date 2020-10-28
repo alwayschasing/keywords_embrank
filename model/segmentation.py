@@ -96,8 +96,8 @@ class SentenceSegmentation(object):
 
 
 class Segmentation(object):
-    def __init__(self, stop_words_file=None,
-                 user_dict=None,
+    def __init__(self, user_dict=None, 
+                 stop_words_file=None,
                  allow_speech_tags=allow_speech_tags,
                  delimiters=sentence_delimiters):
         """

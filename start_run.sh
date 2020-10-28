@@ -1,6 +1,7 @@
 #!/bin/bash
 
 python extract_keywords.py \
+    --debug=1 \
     --vocab="config_data/articles_7d_vocab.txt" \
     --vocab_emb="config_data/articles_7d_word2vec.txt" \
     --keywords_vocab="keyword_vocab_final" \

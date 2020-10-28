@@ -29,7 +29,8 @@ logger = logging.getLogger(__name__)
 def main(args):
     extractor = KeywordsBySenTextrank(vocab_file=args.vocab,
                                       vocab_emb_file=args.vocab_emb,
-                                      keywords_file=args.keywords_vocab)
+                                      keywords_file=args.keywords_vocab,
+                                      user_dict=args.keywords_vocab)
 
     articles = data_util.load_articles(args.input_file)
     wfp = open(args.output_file, "w", encoding="utf-8")
