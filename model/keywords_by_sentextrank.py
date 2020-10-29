@@ -10,7 +10,7 @@ import logging
 from . import util
 from .segmentation import Segmentation
 loglevel=logging.INFO
-if os.environ["DEBUG"] == 1:
+if os.environ["DEBUG"] == "1":
     loglevel=logging.DEBUG
 logging.basicConfig(level=loglevel, format="[%(levelname).1s %(asctime)s] %(message)s", datefmt="%Y-%m-%d_%H:%M:%S")
 logger = logging.getLogger(__name__)
@@ -51,9 +51,9 @@ class KeywordsBySenTextrank(object):
         #self.emb_vocab = gensim.models.KeyedVectors.load_word2vec_format(vocab_emb_file)
         self.emb_vocab = util.load_word2vec_emb(vocab_emb_file)
         assert len(self.emb_vocab) == len(self.vocab)
-        logger.info("load vocab emb %s, emb vec size:%d" % (vocab_emb_file, len(self.emb_vocab.items()[0][1])))
+        logger.info("load vocab emb %s" % (vocab_emb_file))
 
-    def get_sentence_textrank(self, sentences, words, sim_func, pagerank_config={'alpha': 0.85}):
+    def get_sentence_textrank(self, sentences, sim_func, pagerank_config={'alpha': 0.85}):
         """将句子按照关键程度从大到小排序
             Keyword arguments:
             sentences         --  列表，元素是句子
@@ -61,13 +61,15 @@ class KeywordsBySenTextrank(object):
             sim_func          --  计算两个句子的相似性，参数是两个由单词组成的列表
             pagerank_config   --  pagerank的设置
         """
-        _source = words
         sentences_num = len(sentences)
         graph = np.zeros((sentences_num, sentences_num))
 
         for x in range(sentences_num):
             for y in range(x, sentences_num):
+                #logger.debug("sentences[%d]:%s" % (x, sentences[x].shape))
+                #logger.debug("sentences[%d]:%s" % (y, sentences[y].shape))
                 similarity = sim_func(sentences[x], sentences[y])
+                #logger.debug("x:%d, y:%d, sim:%f" % (x,y,similarity))
                 graph[x, y] = similarity
                 graph[y, x] = similarity
 
@@ -81,7 +83,17 @@ class KeywordsBySenTextrank(object):
 
     def get_keyword_score(self, text, lower=True, source='no_stop_words'):
         result = self.seg.segment(text=text, lower=lower)
-        sentences = result.sentences
+        tmp_sentences = result.words_no_filter
+        sentences = [] 
+        for sen in tmp_sentences:
+            tmp_sen = []
+            for w in sen:
+                if w in self.vocab:
+                    tmp_sen.append(w) 
+            if len(tmp_sen) == 0:
+                continue
+            logger.debug("[check sen] %s" % (tmp_sen))
+            sentences.append(tmp_sen)
         #words_no_filter = result.words_no_filter
         #words_no_stop_words = result.words_no_stop_words
         #words_all_filters = result.words_all_filters
@@ -97,20 +109,26 @@ class KeywordsBySenTextrank(object):
             for w in sen:
                 word_vecs.append(self.emb_vocab[w])
             word_vecs = np.asarray(word_vecs)
-            sen_vec = np.mean(word_vecs, asix=-1)
+            sen_vec = np.mean(word_vecs, axis=0)
             sentence_vecs.append(sen_vec)
 
         # list of dict item, item.index, item.score
         sentence_score = self.get_sentence_textrank(sentences=sentence_vecs,
                                                     sim_func=util.cosine_similar,
                                                     pagerank_config={'alpha': 0.85})
+        sorted_sentence = sorted(sentence_score, key=lambda x:x.score, reverse=True)
+        logger.debug("[check top sen]%s" % (text))
+        for idx,item in enumerate(sorted_sentence):
+            logger.debug("[check top%d sen]score:%f sentences:%s" % (idx, item.score, "".join(sentences[item.index])))
+
         word_score = {}
         for sen_item in sentence_score:
             sen_idx = sen_item.index
-            sen_score = sen_item.socre
+            sen_score = sen_item.score
 
             sen_words = sentences[sen_idx]
             for w in sen_words:
+                # logger.debug("w:#%s#, sen_idx:#%d#" %(w, sen_idx))
                 if w in word_score:
                     if word_score[w] < sen_score:
                         tmp_score = 1 - scipy.spatial.distance.cosine(self.emb_vocab[w], sentence_vecs[sen_idx])*sen_score
@@ -119,8 +137,12 @@ class KeywordsBySenTextrank(object):
                     tmp_score = 1 - scipy.spatial.distance.cosine(self.emb_vocab[w], sentence_vecs[sen_idx])*sen_score
                     word_score[w] = tmp_score
 
-        sort_word_score = sorted(word_score.items(), lambda x:x[1], reverse=True)
-        return sort_word_score
+        sort_word_score = sorted(word_score.items(), key=lambda x:x[1], reverse=True)
+        final_kw_score = []
+        for item in sort_word_score:
+            if item[0] in self.keywords_vocab:
+                final_kw_score.append(item)
+        return final_kw_score
 
 
 if __name__ == '__main__':

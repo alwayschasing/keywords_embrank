@@ -4,7 +4,9 @@ import jieba.posseg as pseg
 import codecs
 import os
 import thulac
+from . import util
 
+logger = util.set_logger()
 allow_speech_tags = ['an', 'i', 'j', 'l', 'n', 'nr', 'nrfg', 'ns', 'nt', 'nz', 't', 'v', 'vd', 'vn', 'eng']
 sentence_delimiters = ['?', '!', ';', '？', '！', '。', '；', '……', '…', '\n']
 
@@ -20,7 +22,7 @@ class AttrDict(dict):
 
 class WordSegmentation(object):
     """ 分词 """
-    def __init__(self, stop_words_file=None, allow_speech_tags=allow_speech_tags, user_dict=None):
+    def __init__(self, stop_words_file=None, allow_speech_tags=allow_speech_tags, user_dict=None, vocab=None):
         """
         Keyword arguments:
         stop_words_file    -- 保存停止词的文件路径，utf8编码，每行一个停止词。若不是str类型，则使用默认的停止词
@@ -29,11 +31,12 @@ class WordSegmentation(object):
         self.default_speech_tag_filter = allow_speech_tags
         self.stop_words = set()
         self.stop_words_file = get_default_stop_words_file()
-        if type(stop_words_file) is str:
-            self.stop_words_file = stop_words_file
-        for word in codecs.open(self.stop_words_file, 'r', 'utf-8', 'ignore'):
-            self.stop_words.add(word.strip())
-        self.segmenter = thulac.thulac(user_dict=None)
+        self.vocab=vocab
+        if stop_words_file is not None:
+            for word in codecs.open(self.stop_words_file, 'r', 'utf-8', 'ignore'):
+                self.stop_words.add(word.strip())
+        model_path="/search/odin/liruihong/keyword-project/SIFRank_zh/auxiliary_data/thulac.models"
+        self.segmenter = thulac.thulac(model_path=model_path, user_dict=None)
 
     def segment(self, text, lower=True, use_stop_words=True, use_speech_tags_filter=False):
         """对一段文本进行分词，返回list类型的分词结果
@@ -45,6 +48,7 @@ class WordSegmentation(object):
         """
         #jieba_result = pseg.cut(text)
         cut_result = self.segmenter.cut(text)
+        
 
         if use_speech_tags_filter == True:
             cut_result = [w for w in cut_result if w[1] in self.default_speech_tag_filter]
@@ -61,6 +65,7 @@ class WordSegmentation(object):
         if use_stop_words:
             word_list = [word.strip() for word in word_list if word.strip() not in self.stop_words]
 
+        logger.debug("[check segment] %s" % (word_list))
         return word_list
 
     def segment_sentences(self, sentences, lower=True, use_stop_words=True, use_speech_tags_filter=False):

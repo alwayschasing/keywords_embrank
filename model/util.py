@@ -15,6 +15,15 @@ else:
     logging.basicConfig(level=logging.INFO, format="[%(levelname).1s %(asctime)s] %(message)s", datefmt="%Y-%m-%d_%H:%M:%S")
 logger = logging.getLogger(__name__)
 
+
+def set_logger():
+    if os.environ['DEBUG'] == '1':
+        logging.basicConfig(level=logging.DEBUG, format="[%(levelname).1s %(asctime)s] %(message)s", datefmt="%Y-%m-%d_%H:%M:%S")
+    else:
+        logging.basicConfig(level=logging.INFO, format="[%(levelname).1s %(asctime)s] %(message)s", datefmt="%Y-%m-%d_%H:%M:%S")
+    logger = logging.getLogger(__name__)
+    return logger
+    
 try:
     reload(sys)
     sys.setdefaultencoding('utf-8')
@@ -224,17 +233,17 @@ def load_word2vec_emb(input_file):
     vocab_emb = {}
     for idx, line in enumerate(fp):
         if idx == 0:
-            parts = line.strip().split(' ')
+            parts = line.rstrip('\n').split(' ')
             num = int(parts[0])
             size = int(parts[1])
-
-        parts = line.rstrip().split(' ')
+            continue
+        parts = line.rstrip('\n').split(' ')
         word = parts[0]
         vec = [float(x) for x in parts[1:]]
         vocab_emb[word] = vec
 
+    logger.info("num:%d, vocab_emb size:%d" %(num, len(vocab_emb)))
     assert num == len(vocab_emb)
-    assert size == len(vocab_emb.items()[0][1])
     return vocab_emb
 
 
