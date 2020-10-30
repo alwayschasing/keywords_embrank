@@ -221,10 +221,22 @@ def cosine_similar(vec_a, vec_b):
 
 def load_vocab(input_file):
     fp = open(input_file, "r", encoding="utf-8")
-    vocab = []
-    for line in fp:
+    vocab = dict()
+    for idx, line in enumerate(fp):
         word = line.rstrip('\n').split('\t')[0]
-        vocab.append(word)
+        # vocab.append(word)
+        vocab[word] = idx
+    return vocab
+
+def load_vocab_freq(input_file):
+    fp = open(input_file, "r", encoding="utf-8")
+    vocab = dict()
+    for idx, line in enumerate(fp):
+        parts = line.rstrip('\n').split('\t')
+        word = parts[0]
+        freq = int(parts[1])
+        # vocab.append(word)
+        vocab[word] = freq
     return vocab
 
 def load_word2vec_emb(input_file):

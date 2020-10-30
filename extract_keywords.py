@@ -12,6 +12,8 @@ parser.add_argument('--debug', type=int, default=0, help="whether to debug")
 parser.add_argument('--vocab', type=str, default=None, help="vocab file")
 parser.add_argument('--vocab_emb', type=str, default=None, help="vocab emb file")
 parser.add_argument('--keywords_vocab', type=str, default=None, help="keywords vocab file")
+parser.add_argument('--vocab_freq', type=str, default=None, help="vocab word freq file")
+
 
 parser.add_argument('--input_file', type=str, default=None, required=True, help="input file")
 parser.add_argument('--output_file', type=str, default=None, required=True, help="output file")
@@ -29,6 +31,7 @@ logger = logging.getLogger(__name__)
 def main(args):
     extractor = KeywordsBySenTextrank(vocab_file=args.vocab,
                                       vocab_emb_file=args.vocab_emb,
+                                      vocab_freq_file=args.vocab_freq,
                                       keywords_file=args.keywords_vocab,
                                       user_dict=args.keywords_vocab)
 

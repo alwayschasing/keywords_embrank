@@ -5,3 +5,5 @@ config_data/*
 input_data/*
 output_data/*
 *log*
+*/log/*
+/preprocess/preprocess_res/*

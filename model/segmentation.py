@@ -8,6 +8,7 @@ from . import util
 
 logger = util.set_logger()
 allow_speech_tags = ['an', 'i', 'j', 'l', 'n', 'nr', 'nrfg', 'ns', 'nt', 'nz', 't', 'v', 'vd', 'vn', 'eng']
+#sentence_delimiters = ['?', '!', ';', '？', '！', '。', '；', '……', '…', '\n']
 sentence_delimiters = ['?', '!', ';', '？', '！', '。', '；', '……', '…', '\n']
 
 def get_default_stop_words_file():
@@ -36,7 +37,7 @@ class WordSegmentation(object):
             for word in codecs.open(self.stop_words_file, 'r', 'utf-8', 'ignore'):
                 self.stop_words.add(word.strip())
         model_path="/search/odin/liruihong/keyword-project/SIFRank_zh/auxiliary_data/thulac.models"
-        self.segmenter = thulac.thulac(model_path=model_path, user_dict=None)
+        self.segmenter = thulac.thulac(model_path=model_path, user_dict=user_dict)
 
     def segment(self, text, lower=True, use_stop_words=True, use_speech_tags_filter=False):
         """对一段文本进行分词，返回list类型的分词结果
