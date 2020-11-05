@@ -47,10 +47,10 @@ def main(args):
 
         doc_text = doc_title + "。" + doc_content
         keysentence_score = extractor.get_keysentence_score(doc_text)
-        debug_line = "\t".join(["%s\t%f" % (kw,score) for kw,score in keysentence_score])
+        debug_line = "\t".join(["%s\tsenscore%f" % (kw,score) for kw,score in keysentence_score])
         logger.debug("%s\n[keysens]%s" % (doc_text, debug_line))
 
-        write_line = "\t".join(["%s\t%f" % (ks,score) for ks,score in keysentence_score])
+        write_line = "\t".join(["%s\tsenscore:%f" % (ks,score) for ks,score in keysentence_score])
         wfp.write("%s\t%s\n" % (doc_id, write_line))
     wfp.close()
 

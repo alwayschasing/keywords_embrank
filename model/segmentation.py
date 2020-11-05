@@ -109,6 +109,7 @@ class SentenceSegmentation(object):
 class Segmentation(object):
     def __init__(self, user_dict=None,
                  stop_words_file=None,
+                 use_speech_tag=False,
                  allow_speech_tags=allow_speech_tags,
                  delimiters=sentence_delimiters):
         """
@@ -116,7 +117,7 @@ class Segmentation(object):
         stop_words_file -- 停止词文件
         delimiters      -- 用来拆分句子的符号集合
         """
-        self.ws = WordSegmentation(stop_words_file=stop_words_file, allow_speech_tags=allow_speech_tags, user_dict=user_dict)
+        self.ws = WordSegmentation(stop_words_file=stop_words_file, allow_speech_tags=allow_speech_tags, user_dict=user_dict, use_speech_tag=use_speech_tag)
         self.ss = SentenceSegmentation(delimiters=delimiters)
 
     def segment(self, text, lower=False):
