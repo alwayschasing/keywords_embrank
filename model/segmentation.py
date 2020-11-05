@@ -23,7 +23,7 @@ class AttrDict(dict):
 
 class WordSegmentation(object):
     """ 分词 """
-    def __init__(self, stop_words_file=None, allow_speech_tags=allow_speech_tags, user_dict=None, vocab=None):
+    def __init__(self, stop_words_file=None, allow_speech_tags=allow_speech_tags, user_dict=None, vocab=None, use_speech_tag=False):
         """
         Keyword arguments:
         stop_words_file    -- 保存停止词的文件路径，utf8编码，每行一个停止词。若不是str类型，则使用默认的停止词
@@ -37,7 +37,12 @@ class WordSegmentation(object):
             for word in codecs.open(self.stop_words_file, 'r', 'utf-8', 'ignore'):
                 self.stop_words.add(word.strip())
         model_path="/search/odin/liruihong/keyword-project/SIFRank_zh/auxiliary_data/thulac.models"
-        self.segmenter = thulac.thulac(model_path=model_path, user_dict=user_dict)
+        if use_speech_tag == False:
+            self.segmenter = thulac.thulac(model_path=model_path, user_dict=user_dict, seg_only=True)
+        else:
+            self.segmenter = thulac.thulac(model_path=model_path, user_dict=user_dict)
+        self.use_speech_tag = use_speech_tag
+
 
     def segment(self, text, lower=True, use_stop_words=True, use_speech_tags_filter=False):
         """对一段文本进行分词，返回list类型的分词结果
@@ -49,8 +54,8 @@ class WordSegmentation(object):
         """
         #jieba_result = pseg.cut(text)
         cut_result = self.segmenter.cut(text)
-        
 
+        use_speech_tags_filter = self.use_speech_tag
         if use_speech_tags_filter == True:
             cut_result = [w for w in cut_result if w[1] in self.default_speech_tag_filter]
         else:
@@ -102,7 +107,7 @@ class SentenceSegmentation(object):
 
 
 class Segmentation(object):
-    def __init__(self, user_dict=None, 
+    def __init__(self, user_dict=None,
                  stop_words_file=None,
                  allow_speech_tags=allow_speech_tags,
                  delimiters=sentence_delimiters):

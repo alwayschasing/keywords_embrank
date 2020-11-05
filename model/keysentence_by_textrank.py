@@ -16,7 +16,7 @@ logging.basicConfig(level=loglevel, format="[%(levelname).1s %(asctime)s] %(mess
 logger = logging.getLogger(__name__)
 
 
-class KeywordsBySenTextrank(object):
+class KeySentenceByTextrank(object):
     def __init__(self,
                  vocab_file,
                  vocab_emb_file,
@@ -108,7 +108,7 @@ class KeywordsBySenTextrank(object):
             sentence_score.append(util.Item(index=index, score=score))
         return sentence_score
 
-    def get_keyword_score(self, text, lower=True, source='no_stop_words'):
+    def get_keysentence_score(self, text, lower=True, source='no_stop_words'):
         result = self.seg.segment(text=text, lower=lower)
         tmp_sentences = result.words_no_filter
         sentences = []
@@ -148,40 +148,10 @@ class KeywordsBySenTextrank(object):
         logger.debug("[check top sen]%s" % (text))
         for idx,item in enumerate(sorted_sentence):
             logger.debug("[check top%d sen]score:%f sentences:%s" % (idx, item.score, "".join(sentences[item.index])))
-
-        sen_scores = []
-        for sen_item in sentence_score:
-            sen_scores.append(sen_item.score)
-        sen_scores = np.reshape(np.asarray(sen_scores), (-1,1))
-        doc_vec = np.mean(sen_scores*sentence_vecs, axis=0)
-
-        word_score = {}
-        for sen_words in sentences:
-            for w in sen_words:
-                if w in word_score:
-                    continue
-                word_score[w] = 1 - scipy.spatial.distance.cosine(self.emb_vocab[w], doc_vec)
-
-        #for sen_item in sentence_score:
-        #    sen_idx = sen_item.index
-        #    sen_score = sen_item.score
-
-        #    sen_words = sentences[sen_idx]
-        #    for w in sen_words:
-        #        # logger.debug("w:#%s#, sen_idx:#%d#" %(w, sen_idx))
-        #        if w in word_score:
-        #            if word_score[w] < sen_score:
-        #                tmp_score = 1 - scipy.spatial.distance.cosine(self.emb_vocab[w], sentence_vecs[sen_idx])*sen_score
-        #                word_score[w] = tmp_score
-        #        else:
-        #            tmp_score = 1 - scipy.spatial.distance.cosine(self.emb_vocab[w], sentence_vecs[sen_idx])*sen_score
-        #            word_score[w] = tmp_score
-        sort_word_score = sorted(word_score.items(), key=lambda x:x[1], reverse=True)
-        final_kw_score = []
-        for item in sort_word_score:
-            if item[0] in self.keywords_vocab:
-                final_kw_score.append(item)
-        return final_kw_score
+        sentence_scores = []
+        for item in sorted_sentence:
+            sentence_scores.append([sentences[item.index], item.score])
+        return sentence_scores
 
 
 if __name__ == '__main__':

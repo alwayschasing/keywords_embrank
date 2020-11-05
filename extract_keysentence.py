@@ -4,7 +4,7 @@ import logging
 import os
 os.environ["DEBUG"] = "1"
 import argparse
-from model import KeywordsBySenTextrank
+from model import KeySentenceByTextrank
 import data_util
 
 parser = argparse.ArgumentParser()
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 def main(args):
-    extractor = KeywordsBySenTextrank(vocab_file=args.vocab,
+    extractor = KeySentenceByTextrank(vocab_file=args.vocab,
                                       vocab_emb_file=args.vocab_emb,
                                       vocab_freq_file=args.vocab_freq,
                                       keywords_file=args.keywords_vocab,
@@ -46,11 +46,11 @@ def main(args):
         doc_content = doc_item.content
 
         doc_text = doc_title + "。" + doc_content
-        keyword_score = extractor.get_keyword_score(doc_text)
-        debug_line = "\t".join(["%s:%f" % (kw,score) for kw,score in keyword_score])
-        logger.debug("%s\n[keywords]%s" % (doc_text, debug_line))
+        keysentence_score = extractor.get_keysentence_score(doc_text)
+        debug_line = "\t".join(["%s\t%f" % (kw,score) for kw,score in keysentence_score])
+        logger.debug("%s\n[keysens]%s" % (doc_text, debug_line))
 
-        write_line = " ".join(["%s:%f" % (kw,score) for kw,score in keyword_score])
+        write_line = "\t".join(["%s\t%f" % (ks,score) for ks,score in keysentence_score])
         wfp.write("%s\t%s\n" % (doc_id, write_line))
     wfp.close()
 
